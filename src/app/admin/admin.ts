@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {Author, Book} from '../books/model/book';
-import {BooksService} from '../books/service/books.service';
+import {AuthorEntity, BookEntity} from '../books/model/bookEntity';
+import {BooksService} from '../books/service/books-service';
 import { NgStyle } from '@angular/common';
 
 function categoryValidator(control: FormControl<string>): { [s: string]: boolean } | null {
@@ -14,12 +14,11 @@ function categoryValidator(control: FormControl<string>): { [s: string]: boolean
 
 @Component({
   selector: 'app-admin',
-  templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.css'],
-  standalone: true,
+  templateUrl: './admin.html',
+  styleUrls: ['./admin.css'],
   imports: [NgStyle, FormsModule, ReactiveFormsModule]
 })
-export class AdminComponent implements OnInit {
+export class Admin implements OnInit {
   private builder: FormBuilder = inject(FormBuilder);
   private booksService: BooksService = inject(BooksService);
   message: string = '';
@@ -69,39 +68,41 @@ export class AdminComponent implements OnInit {
   }
 
   onSubmit(): void {
-    const book = new Book(0,
-      <string>this.bookForm.value.category,
-      <string>this.bookForm.value.title,
-      Number(this.bookForm.value.cost),
-      [],
-      Number(this.bookForm.value.year),
-      <string>this.bookForm.value.description);
-    const authors = <Author[]>this.bookForm.value.authors;
-    this.booksService.addBook(book).subscribe({
-      next: (response) => {
-        authors.forEach(
-          (author: Author) => {
-            this.booksService.getAuthorsNamed(author.firstName, author.lastName).subscribe({
-                next: (authorList: Author[]) => {
-                  if (authorList === undefined || authorList.length === 0) {
-                    this.booksService.addBookAuthor(response.id, author).subscribe();
-                  } else {
-                    // *** Assumes unique firstName/LastName for Authors
-                    this.booksService.updateBookAuthors(response.id, authorList[0].id).subscribe();
+    if (!this.bookForm.invalid) {
+      const book = new BookEntity(0,
+        <string>this.bookForm.value.category,
+        <string>this.bookForm.value.title,
+        Number(this.bookForm.value.cost),
+        [],
+        Number(this.bookForm.value.year),
+        <string>this.bookForm.value.description);
+      const authors = <AuthorEntity[]>this.bookForm.value.authors;
+      this.booksService.addBook(book).subscribe({
+        next: (response) => {
+          authors.forEach(
+            (author: AuthorEntity) => {
+              this.booksService.getAuthorsNamed(author.firstName, author.lastName).subscribe({
+                  next: (authorList: AuthorEntity[]) => {
+                    if (authorList === undefined || authorList.length === 0) {
+                      this.booksService.addBookAuthor(response.id, author).subscribe();
+                    } else {
+                      // *** Assumes unique firstName/LastName for Authors
+                      this.booksService.updateBookAuthors(response.id, authorList[0].id).subscribe();
+                    }
                   }
                 }
-              }
-            );
-          }
-        );
-        this.showMessage('info', `The was successfully added with id ${response.id}`);
-      },
-      error: (_: any) => {
-        this.showMessage('error', 'Unable to add the book');
-      }
-    });
-    this.bookForm.reset();
-    this.authors.clear();
+              );
+            }
+          );
+          this.showMessage('info', `The was successfully added with id ${response.id}`);
+        },
+        error: (_: any) => {
+          this.showMessage('error', 'Unable to add the book');
+        }
+      });
+      this.bookForm.reset();
+      this.authors.clear();
+    }
   }
 
   addAuthor(): void {

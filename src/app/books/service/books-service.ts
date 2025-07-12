@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {Author, Book} from '../model/book';
+import {AuthorEntity, BookEntity} from '../model/bookEntity';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import {Observable} from "rxjs";
 import {map} from 'rxjs/operators';
@@ -12,16 +12,16 @@ const Url = 'http://localhost:8080/books-api/';
 export class BooksService {
   private http: HttpClient = inject(HttpClient);
 
-  public getBook(id: string): Observable<Book> {
-    return this.http.get<Book>(Url + 'books/' + id);
+  public getBook(id: string): Observable<BookEntity> {
+    return this.http.get<BookEntity>(Url + 'books/' + id);
   }
 
-  public addBook(book: Book): Observable<Book> {
-    return this.http.post<Book>(Url + 'books', book);
+  public addBook(book: BookEntity): Observable<BookEntity> {
+    return this.http.post<BookEntity>(Url + 'books', book);
   }
 
-  public addBookAuthor(id: number, author: Author): Observable<Author> {
-    return this.http.post<Author>(Url + 'books/' + id + '/authors', author);
+  public addBookAuthor(id: number, author: AuthorEntity): Observable<AuthorEntity> {
+    return this.http.post<AuthorEntity>(Url + 'books/' + id + '/authors', author);
   }
 
   public getAuthorsNamed(firstName: string, lastName: string): Observable<any> {

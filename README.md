@@ -35,3 +35,9 @@ Q3
 
 Q4
 ![alt text](image-3.png)
+
+Q5
+![alt text](image-4.png)
+
+Q6
+![alt text](image-5.png)
